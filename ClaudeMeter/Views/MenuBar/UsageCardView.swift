@@ -68,7 +68,7 @@ struct UsageCardView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "clock")
                         .font(.caption)
-                    Text("Resets \(usageLimit.resetDescription)")
+                    Text(resetTimeText)
                         .font(.caption)
                 }
                 .help(usageLimit.resetTimeFormatted)
@@ -91,7 +91,15 @@ struct UsageCardView: View {
         .cornerRadius(12)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(Int(usageLimit.percentage))% used, \(usageLimit.status.accessibilityDescription)")
-        .accessibilityValue("Resets \(usageLimit.resetDescription)")
+        .accessibilityValue(resetTimeText)
+    }
+    
+    /// Formatted reset time text with appropriate prefix
+    private var resetTimeText: String {
+        if usageLimit.resetAt == nil {
+            return usageLimit.resetDescription
+        }
+        return "Resets \(usageLimit.resetDescription)"
     }
 }
 

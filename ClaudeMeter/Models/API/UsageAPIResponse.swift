@@ -53,16 +53,13 @@ extension UsageAPIResponse {
         let iso8601Formatter = ISO8601DateFormatter()
         iso8601Formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
-        // Parse reset dates (must be present and valid)
-        let sessionResetDate: Date
+        // Parse session reset date (nil when session hasn't started - e.g., after reset)
+        let sessionResetDate: Date? = fiveHour.resetsAt.flatMap { iso8601Formatter.date(from: $0) }
+        // When session hasn't started (resets_at is null), utilization should be 0%
+        let sessionUtilization = sessionResetDate == nil ? 0.0 : fiveHour.utilization
+
+        // Parse weekly reset date (required)
         let weeklyResetDate: Date
-
-        guard let sessionResetString = fiveHour.resetsAt,
-              let parsedDate = iso8601Formatter.date(from: sessionResetString) else {
-            throw MappingError.missingCriticalField(field: "fiveHour.resetsAt")
-        }
-        sessionResetDate = parsedDate
-
         guard let weeklyResetString = sevenDay.resetsAt,
               let parsedDate = iso8601Formatter.date(from: weeklyResetString) else {
             throw MappingError.missingCriticalField(field: "sevenDay.resetsAt")
@@ -71,25 +68,28 @@ extension UsageAPIResponse {
 
         // Handle optional sonnet usage
         let sonnetLimit: UsageLimit? = sevenDaySonnet.flatMap { sonnet in
-            let sonnetResetDate: Date
+            let sonnetResetDate: Date?
 
             if let sonnetResetString = sonnet.resetsAt,
                let parsedDate = iso8601Formatter.date(from: sonnetResetString) {
                 sonnetResetDate = parsedDate
             } else {
-                // Default to 7 days in the future if no reset date
-                sonnetResetDate = Date().addingTimeInterval(7 * 24 * 3600)
+                // Sonnet reset date is optional (nil when not started)
+                sonnetResetDate = nil
             }
 
+            // When sonnet hasn't started, utilization should be 0%
+            let sonnetUtilization = sonnetResetDate == nil ? 0.0 : sonnet.utilization
+
             return UsageLimit(
-                utilization: sonnet.utilization,
+                utilization: sonnetUtilization,
                 resetAt: sonnetResetDate
             )
         }
 
         return UsageData(
             sessionUsage: UsageLimit(
-                utilization: fiveHour.utilization,
+                utilization: sessionUtilization,
                 resetAt: sessionResetDate
             ),
             weeklyUsage: UsageLimit(

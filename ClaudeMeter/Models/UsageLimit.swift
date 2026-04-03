@@ -12,8 +12,8 @@ struct UsageLimit: Codable, Equatable, Sendable {
     /// Utilization percentage (0-100)
     let utilization: Double
 
-    /// ISO8601 timestamp when limit resets
-    let resetAt: Date
+    /// ISO8601 timestamp when limit resets (nil for session when not started)
+    let resetAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case utilization
@@ -41,14 +41,22 @@ extension UsageLimit {
     }
 
     /// Human-readable reset time (uses system timezone via RelativeDateTimeFormatter)
+    /// Returns "Starts when a message is sent" if resetAt is nil (session not started)
     var resetDescription: String {
+        guard let resetAt else {
+            return "Starts when a message is sent"
+        }
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full
         return formatter.localizedString(for: resetAt, relativeTo: Date())
     }
 
     /// Exact reset time formatted in user's timezone for tooltip display
+    /// Returns empty string if resetAt is nil
     var resetTimeFormatted: String {
+        guard let resetAt else {
+            return ""
+        }
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
@@ -63,12 +71,14 @@ extension UsageLimit {
 
     /// Check if reset time has passed but usage hasn't reset
     var isResetting: Bool {
-        resetAt < Date() && utilization > 0
+        guard let resetAt else { return false }
+        return resetAt < Date() && utilization > 0
     }
 
     /// Returns true if current usage rate will likely exceed limit before reset
     /// - Parameter windowDuration: Duration of the usage window (e.g., 5 hours for session)
     func isAtRisk(windowDuration: TimeInterval) -> Bool {
+        guard let resetAt else { return false }
         let now = Date()
         guard resetAt > now else { return false }
 

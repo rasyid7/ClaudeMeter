@@ -98,7 +98,7 @@ final class NotificationService: NSObject, NotificationServiceProtocol, UNUserNo
     func sendThresholdNotification(
         percentage: Double,
         threshold: UsageThresholdType,
-        resetTime: Date
+        resetTime: Date?
     ) async throws {
         // Check if notifications are enabled
         guard await shouldSendNotifications() else { return }
