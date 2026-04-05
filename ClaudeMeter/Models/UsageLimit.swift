@@ -40,15 +40,37 @@ extension UsageLimit {
         }
     }
 
-    /// Human-readable reset time (uses system timezone via RelativeDateTimeFormatter)
+    /// Human-readable reset time (shows days/hours/minutes as appropriate)
     /// Returns "Starts when a message is sent" if resetAt is nil (session not started)
     var resetDescription: String {
         guard let resetAt else {
             return "Starts when a message is sent"
         }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        return formatter.localizedString(for: resetAt, relativeTo: Date())
+
+        let now = Date()
+        let timeInterval = resetAt.timeIntervalSince(now)
+
+        if timeInterval <= 0 {
+            return "now"
+        }
+
+        let days = Int(timeInterval) / 86400
+        let hours = (Int(timeInterval) % 86400) / 3600
+        let minutes = (Int(timeInterval) % 3600) / 60
+
+        if days > 0 {
+            if hours > 0 {
+                return "in \(days) day\(days == 1 ? "" : "s") \(hours) hour\(hours == 1 ? "" : "s")"
+            } else {
+                return "in \(days) day\(days == 1 ? "" : "s")"
+            }
+        } else if hours > 0 && minutes > 0 {
+            return "in \(hours) hour\(hours == 1 ? "" : "s") \(minutes) min"
+        } else if hours > 0 {
+            return "in \(hours) hour\(hours == 1 ? "" : "s")"
+        } else {
+            return "in \(minutes) min"
+        }
     }
 
     /// Exact reset time formatted in user's timezone for tooltip display
