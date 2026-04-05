@@ -104,6 +104,11 @@ struct UsagePopoverView: View {
                             windowDuration: Constants.Pacing.weeklyWindow
                         )
 
+                        // Extra usage credits (conditional rendering)
+                        if let extraUsage = usageData.extraUsage {
+                            ExtraUsageView(extraUsage: extraUsage)
+                        }
+
                         // Sonnet usage card (conditional rendering)
                         if appModel.settings.isSonnetUsageShown, let sonnetUsage = usageData.sonnetUsage {
                             UsageCardView(

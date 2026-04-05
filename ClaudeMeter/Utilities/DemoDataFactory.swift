@@ -108,6 +108,7 @@ enum DemoDataFactory {
             sessionUsage: sessionUsage,
             weeklyUsage: weeklyUsage,
             sonnetUsage: sonnetUsage,
+            extraUsage: nil,
             lastUpdated: Date()
         )
     }

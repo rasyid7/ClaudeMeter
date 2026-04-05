@@ -12,11 +12,28 @@ struct UsageAPIResponse: Codable {
     let fiveHour: UsageLimitResponse
     let sevenDay: UsageLimitResponse
     let sevenDaySonnet: UsageLimitResponse?
+    let extraUsage: ExtraUsageResponse?
 
     enum CodingKeys: String, CodingKey {
         case fiveHour = "five_hour"
         case sevenDay = "seven_day"
         case sevenDaySonnet = "seven_day_sonnet"
+        case extraUsage = "extra_usage"
+    }
+}
+
+/// Extra usage (credits) response from API
+struct ExtraUsageResponse: Codable {
+    let isEnabled: Bool
+    let monthlyLimit: Int
+    let usedCredits: Double
+    let utilization: Double
+
+    enum CodingKeys: String, CodingKey {
+        case isEnabled = "is_enabled"
+        case monthlyLimit = "monthly_limit"
+        case usedCredits = "used_credits"
+        case utilization
     }
 }
 
@@ -87,6 +104,16 @@ extension UsageAPIResponse {
             )
         }
 
+        // Handle optional extra usage
+        let extraUsage: ExtraUsage? = extraUsage.flatMap { extra in
+            guard extra.isEnabled else { return nil }
+            return ExtraUsage(
+                monthlyLimit: extra.monthlyLimit,
+                usedCredits: extra.usedCredits,
+                utilization: extra.utilization
+            )
+        }
+
         return UsageData(
             sessionUsage: UsageLimit(
                 utilization: sessionUtilization,
@@ -97,6 +124,7 @@ extension UsageAPIResponse {
                 resetAt: weeklyResetDate
             ),
             sonnetUsage: sonnetLimit,
+            extraUsage: extraUsage,
             lastUpdated: Date()
         )
     }

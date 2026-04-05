@@ -7,6 +7,19 @@
 
 import Foundation
 
+/// Extra usage (credits) data
+struct ExtraUsage: Codable, Equatable, Sendable {
+    let monthlyLimit: Int
+    let usedCredits: Double
+    let utilization: Double
+
+    enum CodingKeys: String, CodingKey {
+        case monthlyLimit = "monthly_limit"
+        case usedCredits = "used_credits"
+        case utilization
+    }
+}
+
 /// Complete usage data across all limit types
 struct UsageData: Codable, Equatable, Sendable {
     /// 5-hour rolling session usage
@@ -18,6 +31,9 @@ struct UsageData: Codable, Equatable, Sendable {
     /// 7-day Sonnet-specific usage (nil if not used)
     let sonnetUsage: UsageLimit?
 
+    /// Extra usage credits (nil if not enabled)
+    let extraUsage: ExtraUsage?
+
     /// Timestamp of when this data was fetched
     let lastUpdated: Date
 
@@ -25,6 +41,7 @@ struct UsageData: Codable, Equatable, Sendable {
         case sessionUsage = "session_usage"
         case weeklyUsage = "weekly_usage"
         case sonnetUsage = "sonnet_usage"
+        case extraUsage = "extra_usage"
         case lastUpdated = "last_updated"
     }
 }
