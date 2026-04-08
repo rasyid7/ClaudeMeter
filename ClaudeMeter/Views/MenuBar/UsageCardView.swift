@@ -111,7 +111,8 @@ struct UsageCardView: View {
             title: "5-Hour Session",
             usageLimit: UsageLimit(
                 utilization: 35.0,
-                resetAt: Date().addingTimeInterval(7200)
+                resetAt: Date().addingTimeInterval(7200),
+                type: .session
             ),
             icon: "gauge.with.dots.needle.67percent",
             windowDuration: Constants.Pacing.sessionWindow
@@ -121,7 +122,8 @@ struct UsageCardView: View {
             title: "Weekly Usage",
             usageLimit: UsageLimit(
                 utilization: 75.0,
-                resetAt: Date().addingTimeInterval(86400 * 3)
+                resetAt: Date().addingTimeInterval(86400 * 3),
+                type: .weekly
             ),
             icon: "calendar",
             windowDuration: Constants.Pacing.weeklyWindow

@@ -7,17 +7,28 @@
 
 import Foundation
 
+/// Type of usage limit for display purposes
+enum UsageLimitType: Codable, Equatable, Sendable {
+    case session
+    case weekly
+    case sonnet
+}
+
 /// A single usage limit (session, weekly, or Sonnet)
 struct UsageLimit: Codable, Equatable, Sendable {
     /// Utilization percentage (0-100)
     let utilization: Double
 
-    /// ISO8601 timestamp when limit resets (nil for session when not started)
+    /// ISO8601 timestamp when limit resets (nil when usage period hasn't started)
     let resetAt: Date?
+
+    /// Type of limit (for contextual display messages)
+    let type: UsageLimitType
 
     enum CodingKeys: String, CodingKey {
         case utilization
         case resetAt = "reset_at"
+        case type
     }
 }
 
@@ -41,10 +52,15 @@ extension UsageLimit {
     }
 
     /// Human-readable reset time (shows days/hours/minutes as appropriate)
-    /// Returns "Starts when a message is sent" if resetAt is nil (session not started)
+    /// Returns context-appropriate message if resetAt is nil (usage period not started)
     var resetDescription: String {
         guard let resetAt else {
-            return "Starts when a message is sent"
+            switch type {
+            case .session:
+                return "Starts when a message is sent"
+            case .weekly, .sonnet:
+                return "Starts when session begins"
+            }
         }
 
         let now = Date()

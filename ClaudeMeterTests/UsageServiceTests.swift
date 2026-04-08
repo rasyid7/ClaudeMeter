@@ -177,16 +177,25 @@ final class UsageServiceTests: XCTestCase {
 
         XCTAssertEqual(usageData.sessionUsage.utilization, TestConstants.sessionPercentage)
         XCTAssertEqual(usageData.weeklyUsage.utilization, TestConstants.weeklyPercentage)
-        assertDate(usageData.sessionUsage.resetAt, equalsIso8601String: TestConstants.sessionResetDateString)
-        assertDate(usageData.weeklyUsage.resetAt, equalsIso8601String: TestConstants.weeklyResetDateString)
+        if let sessionResetAt = usageData.sessionUsage.resetAt {
+            assertDate(sessionResetAt, equalsIso8601String: TestConstants.sessionResetDateString)
+        } else {
+            XCTFail("Expected session usage reset date")
+        }
+        if let weeklyResetAt = usageData.weeklyUsage.resetAt {
+            assertDate(weeklyResetAt, equalsIso8601String: TestConstants.weeklyResetDateString)
+        } else {
+            XCTFail("Expected weekly usage reset date")
+        }
     }
 
-    func test_usageFetch_withInvalidPayload_surfacesInvalidResponse() async throws {
+    func test_usageFetch_withNullResetDates_showsZeroUtilization() async throws {
+        // When reset dates are null (e.g., after limit reset), utilization should be 0%
         let responseData = try makeUsageResponseData(
-            sessionUtilization: TestConstants.sessionPercentage,
-            weeklyUtilization: TestConstants.weeklyPercentage,
+            sessionUtilization: 50.0,
+            weeklyUtilization: 75.0,
             sessionResetAt: nil,
-            weeklyResetAt: TestConstants.weeklyResetDateString,
+            weeklyResetAt: nil,
             sonnetUtilization: nil,
             sonnetResetAt: nil
         )
@@ -212,17 +221,13 @@ final class UsageServiceTests: XCTestCase {
         settings.cachedOrganizationId = UUID(uuidString: TestConstants.organizationUUIDString)
         try await settingsRepository.save(settings)
 
-        do {
-            _ = try await service.fetchUsage(forceRefresh: true)
-            XCTFail("Expected invalidResponse error")
-        } catch AppError.networkError(let networkError) {
-            if case .invalidResponse = networkError {
-                return
-            }
-            XCTFail("Expected invalidResponse error")
-        } catch {
-            XCTFail("Unexpected error: \(error)")
-        }
+        let usageData = try await service.fetchUsage(forceRefresh: true)
+
+        // When reset dates are null, utilization should be forced to 0%
+        XCTAssertEqual(usageData.sessionUsage.utilization, 0.0)
+        XCTAssertEqual(usageData.weeklyUsage.utilization, 0.0)
+        XCTAssertNil(usageData.sessionUsage.resetAt)
+        XCTAssertNil(usageData.weeklyUsage.resetAt)
     }
 
     func test_usageFetch_withSonnetUsage_showsSonnetUsage() async throws {
@@ -293,7 +298,8 @@ private func makeUsageResponseData(
             utilization: weeklyUtilization,
             resetsAt: weeklyResetAt
         ),
-        sevenDaySonnet: sonnetUsage
+        sevenDaySonnet: sonnetUsage,
+        extraUsage: nil
     )
 
     return try JSONEncoder().encode(response)
@@ -301,8 +307,8 @@ private func makeUsageResponseData(
 
 private func makeUsageData(percentage: Double) -> UsageData {
     let resetDate = Date().addingTimeInterval(TestConstants.oneHourInterval)
-    let sessionUsage = UsageLimit(utilization: percentage, resetAt: resetDate)
-    let weeklyUsage = UsageLimit(utilization: TestConstants.weeklyPercentage, resetAt: resetDate)
+    let sessionUsage = UsageLimit(utilization: percentage, resetAt: resetDate, type: .session)
+    let weeklyUsage = UsageLimit(utilization: TestConstants.weeklyPercentage, resetAt: resetDate, type: .weekly)
 
     return UsageData(
         sessionUsage: sessionUsage,

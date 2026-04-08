@@ -343,8 +343,8 @@ final class AppModelTests: XCTestCase {
 
 private func makeUsageData(percentage: Double) -> UsageData {
     let resetDate = Date().addingTimeInterval(TestConstants.oneHourInterval)
-    let sessionUsage = UsageLimit(utilization: percentage, resetAt: resetDate)
-    let weeklyUsage = UsageLimit(utilization: TestConstants.weeklyPercentage, resetAt: resetDate)
+    let sessionUsage = UsageLimit(utilization: percentage, resetAt: resetDate, type: .session)
+    let weeklyUsage = UsageLimit(utilization: TestConstants.weeklyPercentage, resetAt: resetDate, type: .weekly)
 
     return UsageData(
         sessionUsage: sessionUsage,

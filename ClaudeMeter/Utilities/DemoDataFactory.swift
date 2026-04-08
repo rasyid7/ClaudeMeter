@@ -94,12 +94,12 @@ enum DemoDataFactory {
         let sessionResetAt = Date().addingTimeInterval(3 * 3600) // 3 hours from now
         let weeklyResetAt = Date().addingTimeInterval(4 * 24 * 3600) // 4 days from now
 
-        let sessionUsage = UsageLimit(utilization: sessionPercentage, resetAt: sessionResetAt)
-        let weeklyUsage = UsageLimit(utilization: weeklyPercentage, resetAt: weeklyResetAt)
+        let sessionUsage = UsageLimit(utilization: sessionPercentage, resetAt: sessionResetAt, type: .session)
+        let weeklyUsage = UsageLimit(utilization: weeklyPercentage, resetAt: weeklyResetAt, type: .weekly)
 
         let sonnetUsage: UsageLimit?
         if let sonnetPercentage {
-            sonnetUsage = UsageLimit(utilization: sonnetPercentage, resetAt: weeklyResetAt)
+            sonnetUsage = UsageLimit(utilization: sonnetPercentage, resetAt: weeklyResetAt, type: .sonnet)
         } else {
             sonnetUsage = nil
         }

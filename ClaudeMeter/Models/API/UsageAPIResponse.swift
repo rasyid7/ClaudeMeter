@@ -75,32 +75,21 @@ extension UsageAPIResponse {
         // When session hasn't started (resets_at is null), utilization should be 0%
         let sessionUtilization = sessionResetDate == nil ? 0.0 : fiveHour.utilization
 
-        // Parse weekly reset date (required)
-        let weeklyResetDate: Date
-        guard let weeklyResetString = sevenDay.resetsAt,
-              let parsedDate = iso8601Formatter.date(from: weeklyResetString) else {
-            throw MappingError.missingCriticalField(field: "sevenDay.resetsAt")
-        }
-        weeklyResetDate = parsedDate
+        // Parse weekly reset date (nil when weekly limit has been reset and not started)
+        let weeklyResetDate: Date? = sevenDay.resetsAt.flatMap { iso8601Formatter.date(from: $0) }
+        // When weekly hasn't started (resets_at is null), utilization should be 0%
+        let weeklyUtilization = weeklyResetDate == nil ? 0.0 : sevenDay.utilization
 
         // Handle optional sonnet usage
         let sonnetLimit: UsageLimit? = sevenDaySonnet.flatMap { sonnet in
-            let sonnetResetDate: Date?
-
-            if let sonnetResetString = sonnet.resetsAt,
-               let parsedDate = iso8601Formatter.date(from: sonnetResetString) {
-                sonnetResetDate = parsedDate
-            } else {
-                // Sonnet reset date is optional (nil when not started)
-                sonnetResetDate = nil
-            }
-
+            let sonnetResetDate: Date? = sonnet.resetsAt.flatMap { iso8601Formatter.date(from: $0) }
             // When sonnet hasn't started, utilization should be 0%
             let sonnetUtilization = sonnetResetDate == nil ? 0.0 : sonnet.utilization
 
             return UsageLimit(
                 utilization: sonnetUtilization,
-                resetAt: sonnetResetDate
+                resetAt: sonnetResetDate,
+                type: .sonnet
             )
         }
 
@@ -117,11 +106,13 @@ extension UsageAPIResponse {
         return UsageData(
             sessionUsage: UsageLimit(
                 utilization: sessionUtilization,
-                resetAt: sessionResetDate
+                resetAt: sessionResetDate,
+                type: .session
             ),
             weeklyUsage: UsageLimit(
-                utilization: sevenDay.utilization,
-                resetAt: weeklyResetDate
+                utilization: weeklyUtilization,
+                resetAt: weeklyResetDate,
+                type: .weekly
             ),
             sonnetUsage: sonnetLimit,
             extraUsage: extraUsage,
