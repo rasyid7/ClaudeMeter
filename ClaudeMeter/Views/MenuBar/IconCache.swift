@@ -22,7 +22,8 @@ final class IconCache {
         isStale: Bool,
         iconStyle: IconStyle,
         weeklyPercentage: Double,
-        isColored: Bool
+        isColored: Bool,
+        sessionResetAt: Date? = nil
     ) -> NSImage? {
         cache.object(forKey: cacheKey(
             percentage: percentage,
@@ -31,7 +32,8 @@ final class IconCache {
             isStale: isStale,
             iconStyle: iconStyle,
             weeklyPercentage: weeklyPercentage,
-            isColored: isColored
+            isColored: isColored,
+            sessionResetAt: sessionResetAt
         ))
     }
 
@@ -43,7 +45,8 @@ final class IconCache {
         isStale: Bool,
         iconStyle: IconStyle,
         weeklyPercentage: Double,
-        isColored: Bool
+        isColored: Bool,
+        sessionResetAt: Date? = nil
     ) {
         cache.setObject(
             image,
@@ -54,7 +57,8 @@ final class IconCache {
                 isStale: isStale,
                 iconStyle: iconStyle,
                 weeklyPercentage: weeklyPercentage,
-                isColored: isColored
+                isColored: isColored,
+                sessionResetAt: sessionResetAt
             )
         )
     }
@@ -66,10 +70,19 @@ final class IconCache {
         isStale: Bool,
         iconStyle: IconStyle,
         weeklyPercentage: Double,
-        isColored: Bool
+        isColored: Bool,
+        sessionResetAt: Date? = nil
     ) -> NSString {
         let percent = String(format: "%.2f", percentage)
         let weekly = String(format: "%.2f", weeklyPercentage)
-        return "\(percent)|\(weekly)|\(status.rawValue)|\(isLoading)|\(isStale)|\(iconStyle.rawValue)|\(isColored)" as NSString
+        let resetTime: String
+        if let resetAt = sessionResetAt {
+            let hours = Int(resetAt.timeIntervalSince(Date())) / 3600
+            let minutes = (Int(resetAt.timeIntervalSince(Date())) % 3600) / 60
+            resetTime = "\(hours):\(String(format: "%02d", minutes))"
+        } else {
+            resetTime = "none"
+        }
+        return "\(percent)|\(weekly)|\(resetTime)|\(status.rawValue)|\(isLoading)|\(isStale)|\(iconStyle.rawValue)|\(isColored)" as NSString
     }
 }

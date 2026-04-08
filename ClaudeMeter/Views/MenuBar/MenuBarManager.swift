@@ -114,6 +114,7 @@ final class MenuBarManager {
 
         let percentage = clamped(appModel.usageData?.sessionUsage.percentage ?? 0)
         let weeklyPercentage = clamped(appModel.usageData?.weeklyUsage.percentage ?? 0)
+        let sessionResetAt = appModel.usageData?.sessionUsage.resetAt
         let status = appModel.usageData?.primaryStatus ?? .safe
         let isStale = appModel.usageData?.isStale ?? false
         let isLoading = appModel.isLoading
@@ -127,7 +128,8 @@ final class MenuBarManager {
             isStale: isStale,
             iconStyle: style,
             weeklyPercentage: weeklyPercentage,
-            isColored: isColored
+            isColored: isColored,
+            sessionResetAt: sessionResetAt
         ) {
             button.image = cachedImage
             return
@@ -140,7 +142,8 @@ final class MenuBarManager {
             isStale: isStale,
             iconStyle: style,
             weeklyPercentage: weeklyPercentage,
-            isColored: isColored
+            isColored: isColored,
+            sessionResetAt: sessionResetAt
         )
 
         iconCache.set(
@@ -151,7 +154,8 @@ final class MenuBarManager {
             isStale: isStale,
             iconStyle: style,
             weeklyPercentage: weeklyPercentage,
-            isColored: isColored
+            isColored: isColored,
+            sessionResetAt: sessionResetAt
         )
 
         button.image = image
