@@ -26,7 +26,7 @@ struct SetupWizardView: View {
                         .resizable()
                         .frame(width: 64, height: 64)
                 } else {
-                    Image(systemName: "gauge.with.dots.needle.67percent")
+                    Image(systemName: "clock.arrow.circlepath")
                         .font(.system(size: 48))
                         .foregroundColor(.blue)
                 }

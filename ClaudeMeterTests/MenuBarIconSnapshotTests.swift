@@ -42,8 +42,9 @@ final class MenuBarIconSnapshotTests: XCTestCase {
         assertSnapshot(of: image, as: .image, record: isRecording)
     }
 
-    func test_menuBarIcon_showsGaugeStyleWhenWarning() {
-        let image = renderIcon(style: .gauge)
+    func test_menuBarIcon_showsTimeStyleWhenWarning() {
+        let resetAt = Date().addingTimeInterval(2.5 * 3600) // 2:30 remaining
+        let image = renderIcon(style: .time, sessionResetAt: resetAt)
 
         assertSnapshot(of: image, as: .image, record: isRecording)
     }
@@ -64,7 +65,8 @@ final class MenuBarIconSnapshotTests: XCTestCase {
         style: IconStyle,
         status: UsageStatus = .warning,
         isLoading: Bool = false,
-        isStale: Bool = false
+        isStale: Bool = false,
+        sessionResetAt: Date? = nil
     ) -> NSImage {
         MenuBarIconSnapshotRenderer.render(
             percentage: TestConstants.menuBarSnapshotPercentage,
@@ -72,7 +74,8 @@ final class MenuBarIconSnapshotTests: XCTestCase {
             status: status,
             isLoading: isLoading,
             isStale: isStale,
-            iconStyle: style
+            iconStyle: style,
+            sessionResetAt: sessionResetAt
         )
     }
 

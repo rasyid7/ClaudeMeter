@@ -15,6 +15,7 @@ struct MenuBarIconView: View {
     let isStale: Bool
     let iconStyle: IconStyle
     var weeklyPercentage: Double = 0  // Optional, used by dualBar style
+    var sessionResetAt: Date? = nil  // Optional, used by time style
 
     var body: some View {
         switch iconStyle {
@@ -28,8 +29,8 @@ struct MenuBarIconView: View {
             SegmentedBarIcon(percentage: percentage, status: status, isLoading: isLoading, isStale: isStale)
         case .dualBar:
             DualBarIcon(percentage: percentage, weeklyPercentage: weeklyPercentage, status: status, isLoading: isLoading, isStale: isStale)
-        case .gauge:
-            GaugeIcon(percentage: percentage, status: status, isLoading: isLoading, isStale: isStale)
+        case .time:
+            TimeIcon(percentage: percentage, sessionResetAt: sessionResetAt, status: status, isLoading: isLoading, isStale: isStale)
         }
     }
 }
@@ -42,7 +43,15 @@ struct MenuBarIconView: View {
             HStack {
                 Text(style.displayName)
                     .frame(width: 80, alignment: .leading)
-                MenuBarIconView(percentage: 65, status: .warning, isLoading: false, isStale: false, iconStyle: style, weeklyPercentage: 45)
+                MenuBarIconView(
+                    percentage: 65,
+                    status: .warning,
+                    isLoading: false,
+                    isStale: false,
+                    iconStyle: style,
+                    weeklyPercentage: 45,
+                    sessionResetAt: Date().addingTimeInterval(2.5 * 3600)
+                )
             }
         }
     }
