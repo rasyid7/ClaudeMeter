@@ -27,13 +27,15 @@ struct ExtraUsageResponse: Codable {
     let isEnabled: Bool
     let monthlyLimit: Int
     let usedCredits: Double
-    let utilization: Double
+    let utilization: Double? // API may return null when usage period hasn't generated data yet
+    let currency: String?
 
     enum CodingKeys: String, CodingKey {
         case isEnabled = "is_enabled"
         case monthlyLimit = "monthly_limit"
         case usedCredits = "used_credits"
         case utilization
+        case currency
     }
 }
 
@@ -96,10 +98,12 @@ extension UsageAPIResponse {
         // Handle optional extra usage
         let extraUsage: ExtraUsage? = extraUsage.flatMap { extra in
             guard extra.isEnabled else { return nil }
+            // utilization may be null from API; derive from usedCredits/monthlyLimit when absent
+            let utilization = extra.utilization ?? (extra.monthlyLimit > 0 ? (extra.usedCredits / Double(extra.monthlyLimit) * 100) : 0.0)
             return ExtraUsage(
                 monthlyLimit: extra.monthlyLimit,
                 usedCredits: extra.usedCredits,
-                utilization: extra.utilization
+                utilization: utilization
             )
         }
 
