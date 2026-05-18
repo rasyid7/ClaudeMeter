@@ -17,7 +17,8 @@ struct MenuBarIconRenderer {
         isLoading: Bool,
         isStale: Bool,
         iconStyle: IconStyle,
-        weeklyPercentage: Double = 0
+        weeklyPercentage: Double = 0,
+        isColored: Bool = true
     ) -> NSImage {
         let iconView = MenuBarIconView(
             percentage: percentage,
@@ -38,7 +39,7 @@ struct MenuBarIconRenderer {
             ) ?? NSImage()
         }
 
-        nsImage.isTemplate = false
+        nsImage.isTemplate = !isColored
         return nsImage
     }
 }

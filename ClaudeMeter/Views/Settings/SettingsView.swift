@@ -195,14 +195,33 @@ struct SettingsView: View {
 
     private var iconStyleSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Menu Bar Icon Style")
-                .font(.subheadline)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Menu Bar Icon Style")
+                        .font(.subheadline)
 
-            Text("Choose how the usage indicator appears in your menu bar")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                    Text("Choose how the usage indicator appears in menu bar")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
 
-            IconStylePicker(selection: $appModel.settings.iconStyle)
+                Spacer()
+
+                Picker("Icon color", selection: $appModel.settings.isColoredIcon) {
+                    Text("Mono").tag(false)
+                    Text("Color").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(width: 136)
+                .help("Mono uses the standard system menu bar tint")
+                .accessibilityLabel("Icon color mode")
+            }
+
+            IconStylePicker(
+                selection: $appModel.settings.iconStyle,
+                isColored: appModel.settings.isColoredIcon
+            )
         }
         .padding()
         .background(.quaternary.opacity(0.3))

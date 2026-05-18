@@ -10,6 +10,7 @@ import SwiftUI
 /// Visual grid picker for selecting menu bar icon style
 struct IconStylePicker: View {
     @Binding var selection: IconStyle
+    let isColored: Bool
     var onSelectionChanged: ((IconStyle) -> Void)? = nil
 
     private let columns = [
@@ -23,7 +24,8 @@ struct IconStylePicker: View {
             ForEach(IconStyle.allCases) { style in
                 IconStyleCard(
                     style: style,
-                    isSelected: selection == style
+                    isSelected: selection == style,
+                    isColored: isColored
                 )
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -39,6 +41,7 @@ struct IconStylePicker: View {
 struct IconStyleCard: View {
     let style: IconStyle
     let isSelected: Bool
+    let isColored: Bool
 
     /// Preview percentages to show
     private let previewPercentage: Double = 65
@@ -84,14 +87,18 @@ struct IconStyleCard: View {
     }
 
     private var iconPreview: some View {
-        MenuBarIconView(
+        Image(nsImage: MenuBarIconRenderer().render(
             percentage: previewPercentage,
             status: previewStatus,
             isLoading: false,
             isStale: false,
             iconStyle: style,
-            weeklyPercentage: previewWeeklyPercentage
-        )
+            weeklyPercentage: previewWeeklyPercentage,
+            isColored: isColored
+        ))
+            .renderingMode(isColored ? .original : .template)
+            .foregroundStyle(.primary)
+            .accessibilityHidden(true)
     }
 }
 
@@ -100,13 +107,21 @@ struct IconStyleCard: View {
 #Preview {
     struct PreviewWrapper: View {
         @State private var selection: IconStyle = .battery
+        @State private var isColored: Bool = true
 
         var body: some View {
             VStack {
                 Text("Selected: \(selection.displayName)")
                     .padding()
 
-                IconStylePicker(selection: $selection)
+                Picker("Icon color", selection: $isColored) {
+                    Text("Mono").tag(false)
+                    Text("Color").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+
+                IconStylePicker(selection: $selection, isColored: isColored)
                     .padding()
             }
             .frame(width: 400)

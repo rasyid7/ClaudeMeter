@@ -21,11 +21,34 @@ final class SettingsRepositoryTests: XCTestCase {
         settings.isFirstLaunch = false
         settings.cachedOrganizationId = UUID(uuidString: TestConstants.organizationUUIDString)
         settings.iconStyle = .segments
+        settings.isColoredIcon = false
 
         try await repository.save(settings)
         let loaded = await repository.load()
 
         XCTAssertEqual(loaded, settings)
+    }
+
+    func test_settingsDecodingWithoutIsColoredIcon_usesDefault() throws {
+        let data = """
+        {
+          "refresh_interval": 300,
+          "notifications_enabled": false,
+          "notification_thresholds": {
+            "warning_threshold": 70,
+            "critical_threshold": 90,
+            "notify_on_reset": false
+          },
+          "is_first_launch": false,
+          "cached_organization_id": null,
+          "show_sonnet_usage": true,
+          "icon_style": "segments"
+        }
+        """.data(using: .utf8)!
+
+        let settings = try JSONDecoder().decode(AppSettings.self, from: data)
+
+        XCTAssertTrue(settings.isColoredIcon)
     }
 
     func test_notificationStatePersistsAcrossLaunches() async throws {

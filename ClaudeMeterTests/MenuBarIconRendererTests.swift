@@ -69,4 +69,36 @@ final class MenuBarIconRendererTests: XCTestCase {
 
         XCTAssertFalse(image.isTemplate)
     }
+
+    func test_menuBarIconIsRenderedAsTemplateImageWhenMonochromeModeSelected() {
+        let renderer = MenuBarIconRenderer()
+
+        let image = renderer.render(
+            percentage: TestConstants.sessionPercentage,
+            status: .safe,
+            isLoading: false,
+            isStale: false,
+            iconStyle: .battery,
+            weeklyPercentage: TestConstants.weeklyPercentage,
+            isColored: false
+        )
+
+        XCTAssertTrue(image.isTemplate)
+    }
+
+    func test_menuBarIconIsRenderedAsNonTemplateImageWhenColorModeSelected() {
+        let renderer = MenuBarIconRenderer()
+
+        let image = renderer.render(
+            percentage: TestConstants.sessionPercentage,
+            status: .safe,
+            isLoading: false,
+            isStale: false,
+            iconStyle: .battery,
+            weeklyPercentage: TestConstants.weeklyPercentage,
+            isColored: true
+        )
+
+        XCTAssertFalse(image.isTemplate)
+    }
 }
