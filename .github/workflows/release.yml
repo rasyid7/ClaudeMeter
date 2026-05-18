@@ -39,7 +39,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+        uses: maxim-lobanov/setup-xcode@v1.7.0
         with:
           xcode-version: latest-stable
 
@@ -159,7 +159,7 @@ jobs:
           zip -r ../../../../ClaudeMeter-${{ steps.version.outputs.version }}.zip ClaudeMeter.app
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: ClaudeMeter v${{ steps.version.outputs.version }}
