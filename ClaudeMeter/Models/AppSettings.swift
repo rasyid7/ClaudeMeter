@@ -30,6 +30,9 @@ struct AppSettings: Codable, Equatable, Sendable {
     /// Menu bar icon display style
     var iconStyle: IconStyle
 
+    /// Whether menu bar icons are shown in color instead of monochrome.
+    var isColoredIcon: Bool
+
     static let `default` = AppSettings(
         refreshInterval: 60,
         hasNotificationsEnabled: true,
@@ -37,7 +40,8 @@ struct AppSettings: Codable, Equatable, Sendable {
         isFirstLaunch: true,
         cachedOrganizationId: nil,
         isSonnetUsageShown: false,
-        iconStyle: .battery
+        iconStyle: .battery,
+        isColoredIcon: true
     )
 
     enum CodingKeys: String, CodingKey {
@@ -48,6 +52,23 @@ struct AppSettings: Codable, Equatable, Sendable {
         case cachedOrganizationId = "cached_organization_id"
         case isSonnetUsageShown = "show_sonnet_usage"
         case iconStyle = "icon_style"
+        case isColoredIcon = "is_colored_icon"
+    }
+}
+
+extension AppSettings {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let defaults = AppSettings.default
+
+        refreshInterval = try container.decodeIfPresent(TimeInterval.self, forKey: .refreshInterval) ?? defaults.refreshInterval
+        hasNotificationsEnabled = try container.decodeIfPresent(Bool.self, forKey: .hasNotificationsEnabled) ?? defaults.hasNotificationsEnabled
+        notificationThresholds = try container.decodeIfPresent(NotificationThresholds.self, forKey: .notificationThresholds) ?? defaults.notificationThresholds
+        isFirstLaunch = try container.decodeIfPresent(Bool.self, forKey: .isFirstLaunch) ?? defaults.isFirstLaunch
+        cachedOrganizationId = try container.decodeIfPresent(UUID.self, forKey: .cachedOrganizationId)
+        isSonnetUsageShown = try container.decodeIfPresent(Bool.self, forKey: .isSonnetUsageShown) ?? defaults.isSonnetUsageShown
+        iconStyle = try container.decodeIfPresent(IconStyle.self, forKey: .iconStyle) ?? defaults.iconStyle
+        isColoredIcon = try container.decodeIfPresent(Bool.self, forKey: .isColoredIcon) ?? defaults.isColoredIcon
     }
 }
 
